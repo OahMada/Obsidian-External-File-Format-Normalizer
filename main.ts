@@ -29,10 +29,11 @@ export default class ExternalFileFormatNormalizerPlugin extends Plugin {
 		this.addCommand({
 			id: "apply-normalizer",
 			name: "Apply Normalizer",
-			editorCallback: (editor: Editor) => {
-				const selectionText = editor.getSelection();
+			editorCallback: async (editor: Editor) => {
+				const currentFileText = editor.getValue();
+
 				// handle images
-				let normalizedText = selectionText.replace(
+				let normalizedText = currentFileText.replace(
 					/!\[\[(?:(?:[^#\n\]]+)#)?([^\]\n|]+)(?<=gif|jpe?g|tiff?|png|webp|bmp)(?:\|(?:[^\]\n]+))?\]\]/gim,
 					"\n\t![$1]($1)"
 				);
@@ -41,11 +42,12 @@ export default class ExternalFileFormatNormalizerPlugin extends Plugin {
 					/!\[\[(?:(?:[^#\n\]]+)#)?([^\]\n|]+)(?<!gif|jpe?g|tiff?|png|webp|bmp)(?:\|(?:[^\]\n]+))?\]\]/gim,
 					"\n\t[$1]($1)"
 				);
+
 				if (this.settings.copyToClipboard) {
 					clipboard.writeText(normalizedText);
 					new Notice("Normalized Text Copied");
 				} else {
-					editor.replaceSelection(normalizedText);
+					editor.setValue(normalizedText);
 					new Notice("Normalized Applied");
 				}
 			},
