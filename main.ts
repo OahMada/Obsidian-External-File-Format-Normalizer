@@ -28,18 +28,18 @@ export default class ExternalFileFormatNormalizerPlugin extends Plugin {
 		// This adds an editor command that can perform some operation on the current editor instance
 		this.addCommand({
 			id: "apply-normalizer",
-			name: "Apply Normalizer In Place",
+			name: "Apply Normalizer",
 			editorCallback: (editor: Editor) => {
 				const selectionText = editor.getSelection();
 				// handle images
 				let normalizedText = selectionText.replace(
-					/!\[\[(?:(?:[^#\n\]]+)#)?([^\]\n|]+)(?<=[gif|jpe?g|tiff?|png|webp|bmp])(?:\|(?:[^\]\n]+))?\]\]/gim,
-					"![$1]($1)"
+					/!\[\[(?:(?:[^#\n\]]+)#)?([^\]\n|]+)(?<=gif|jpe?g|tiff?|png|webp|bmp)(?:\|(?:[^\]\n]+))?\]\]/gim,
+					"\n\t![$1]($1)"
 				);
 				// handle non-images
 				normalizedText = normalizedText.replace(
-					/!\[\[(?:(?:[^#\n\]]+)#)?([^\]\n|]+)(?<=[^gif|jpe?g|tiff?|png|webp|bmp])(?:\|(?:[^\]\n]+))?\]\]/gim,
-					"[$1]($1)"
+					/!\[\[(?:(?:[^#\n\]]+)#)?([^\]\n|]+)(?<!gif|jpe?g|tiff?|png|webp|bmp)(?:\|(?:[^\]\n]+))?\]\]/gim,
+					"\n\t[$1]($1)"
 				);
 				if (this.settings.copyToClipboard) {
 					clipboard.writeText(normalizedText);
