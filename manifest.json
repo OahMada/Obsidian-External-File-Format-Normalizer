@@ -1,7 +1,7 @@
 {
 	"id": "obsidian-external-file-format-normalizer",
 	"name": "External File Format Normalizer",
-	"version": "1.0.0",
+	"version": "1.0.2",
 	"minAppVersion": "0.15.0",
 	"description": "This plugin finds any external file inserted in Obsidian's native format and converts the inserting format into standard Markdown syntax",
 	"author": "Adam Hao",
