@@ -32,22 +32,32 @@ export default class ExternalFileFormatNormalizerPlugin extends Plugin {
 			editorCallback: async (editor: Editor) => {
 				const currentFileText = editor.getValue();
 
-				// handle images
-				let normalizedText = currentFileText.replace(
-					/!\[\[(?:(?:[^#\n\]]+)#)?([^\]\n|]+)(?<=gif|jpe?g|tiff?|png|webp|bmp)(?:\|(?:[^\]\n]+))?\]\]/gim,
-					"\n\t![$1]($1)"
-				);
-				// handle non-images
-				normalizedText = normalizedText.replace(
-					/!\[\[(?:(?:[^#\n\]]+)#)?([^\]\n|]+)(?<!gif|jpe?g|tiff?|png|webp|bmp)(?:\|(?:[^\]\n]+))?\]\]/gim,
-					"\n\t[$1]($1)"
-				);
+				const normalizedText = this.normalizer(currentFileText);
 
 				if (this.settings.copyToClipboard) {
 					clipboard.writeText(normalizedText);
 					new Notice("Normalized Text Copied");
 				} else {
 					editor.setValue(normalizedText);
+					new Notice("Normalized Applied");
+				}
+			},
+		});
+
+		this.addCommand({
+			id: "apply-normalizer-on-selection",
+			name: "Apply Normalizer On Selection",
+			editorCallback: async (editor: Editor) => {
+				const selectionText = editor.getSelection();
+
+				// handle images
+				const normalizedText = this.normalizer(selectionText);
+
+				if (this.settings.copyToClipboard) {
+					clipboard.writeText(normalizedText);
+					new Notice("Normalized Text Copied");
+				} else {
+					editor.replaceSelection(normalizedText);
 					new Notice("Normalized Applied");
 				}
 			},
@@ -60,6 +70,20 @@ export default class ExternalFileFormatNormalizerPlugin extends Plugin {
 	}
 
 	onunload() {}
+
+	normalizer(text: string) {
+		// handle images
+		let normalizedText = text.replace(
+			/!\[\[(?:(?:[^#\n\]]+)#)?([^\]\n|]+)(?<=gif|jpe?g|tiff?|png|webp|bmp)(?:\|(?:[^\]\n]+))?\]\]/gim,
+			"\n\t![$1]($1)"
+		);
+		// handle non-images
+		normalizedText = normalizedText.replace(
+			/!\[\[(?:(?:[^#\n\]]+)#)?([^\]\n|]+)(?<!gif|jpe?g|tiff?|png|webp|bmp)(?:\|(?:[^\]\n]+))?\]\]/gim,
+			"\n\t[$1]($1)"
+		);
+		return normalizedText;
+	}
 
 	async loadSettings() {
 		this.settings = Object.assign(
